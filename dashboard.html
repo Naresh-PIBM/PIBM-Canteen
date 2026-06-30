@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>PIBM Canteen Dashboard</title>
+
+<style>
+
+body{
+
+    font-family:Arial;
+
+    background:#f4f4f4;
+
+    margin:20px;
+
+}
+
+h1{
+
+    text-align:center;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:10px;
+
+    padding:20px;
+
+    margin:15px 0;
+
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+
+}
+
+.title{
+
+    font-size:18px;
+
+    color:#666;
+
+}
+
+.value{
+
+    font-size:38px;
+
+    font-weight:bold;
+
+    margin-top:10px;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th,td{
+
+    border:1px solid #ddd;
+
+    padding:10px;
+
+    text-align:center;
+
+}
+
+th{
+
+    background:#0d6efd;
+
+    color:white;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>PIBM Canteen Live Dashboard</h1>
+
+<div class="card">
+
+<div class="title">
+
+Today's Meals
+
+</div>
+
+<div class="value" id="totalMeals">
+
+0
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="title">
+
+Last Scan
+
+</div>
+
+<div id="lastScan">
+
+Waiting...
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="title">
+
+Counter Summary
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Counter</th>
+
+<th>Meals</th>
+
+</tr>
+
+</thead>
+
+<tbody id="counterTable">
+
+<tr>
+
+<td colspan="2">
+
+Loading...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script src="dashboard.js"></script>
+
+</body>
+
+</html>

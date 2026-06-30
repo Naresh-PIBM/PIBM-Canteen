@@ -1,0 +1,19 @@
+{
+  "name": "pibm-canteen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "google-spreadsheet": "^5.3.0",
+    "googleapis": "^173.0.0"
+  }
+}
