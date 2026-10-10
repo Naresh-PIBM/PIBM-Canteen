@@ -197,3 +197,23 @@ window.addEventListener("online",function(){
 //------------------------------------
 
 setInterval(syncOfflineData,30000);
+async function lookupStudent(studentId) {
+    const url =
+        API_URL +
+        "?action=lookup&id=" +
+        encodeURIComponent(String(studentId).trim());
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error("Student lookup failed");
+    }
+
+    const data = await response.json();
+
+    if (!data.success || !data.student) {
+        return null;
+    }
+
+    return data.student;
+}

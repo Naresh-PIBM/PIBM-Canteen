@@ -44,55 +44,104 @@ function startScanner() {
 
 }
 
-function onScanSuccess(decodedText) {
 
-    let now = Date.now();
+async function onScanSuccess(decodedText) {
 
-    // Remove old entries (>15 sec)
+    const studentId = String(decodedText).trim();
+    const result = document.getElementById("result");
+    const now = Date.now();
+
+    // Remove old entries (>15 seconds)
     for (let code in recentScans) {
-
         if (now - recentScans[code] > 15000) {
-
             delete recentScans[code];
-
         }
-
     }
 
-    // Duplicate Found
-    if (recentScans[decodedText]) {
-
-        document.getElementById("result").innerHTML =
+    // Duplicate check
+    if (recentScans[studentId]) {
+        result.innerHTML =
             "<span style='color:red;font-size:28px;font-weight:bold;'>⚠ DUPLICATE SCAN</span><br><br>" +
-            decodedText;
+            studentId;
 
-        // Long Beep
-        new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg").play();
+        new Audio(
+            "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+        ).play();
 
         return;
-
     }
 
-    // Save in memory
-    recentScans[decodedText] = now;
+    // Prevent repeated callbacks while lookup is in progress
+    recentScans[studentId] = now;
 
-    // Short Success Beep
-    new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play();
+    result.innerHTML =
+        "<span style='font-size:24px;font-weight:bold;'>🔎 Checking student...</span><br><br>" +
+        studentId;
 
-    document.getElementById("result").innerHTML =
-        "<span style='color:green;font-size:28px;font-weight:bold;'>Saving...</span><br><br>" +
-        decodedText;
+    try {
 
-    const scanData = {
+        const student = await lookupStudent(studentId);
 
-    counter: document.getElementById("counter").value,
+        // Student not found
+        if (!student) {
+            delete recentScans[studentId];
 
-    barcode: decodedText,
+            result.innerHTML =
+                "<span style='color:red;font-size:28px;font-weight:bold;'>❌ STUDENT NOT FOUND</span><br><br>" +
+                studentId;
 
-    device: navigator.userAgent
+            new Audio(
+                "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+            ).play();
 
-};
+            return;
+        }
 
-saveScan(scanData);
+        // Display student details
+        result.innerHTML =
+            "<span style='color:green;font-size:26px;font-weight:bold;'>✅ STUDENT IDENTIFIED</span><br><br>" +
+            "<b>Name:</b> " + escapeHtml(student.name) + "<br>" +
+            "<b>Student ID:</b> " + escapeHtml(student.borrowerId) + "<br>" +
+            "<b>Section:</b> " + escapeHtml(student.section);
 
+        // Success beep
+        new Audio(
+            "https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"
+        ).play();
+
+        // Prepare meal record
+        const scanData = {
+            counter: document.getElementById("counter").value,
+            barcode: studentId,
+            device: navigator.userAgent
+        };
+
+        // Save only after student is found
+        saveScan(scanData);
+
+    } catch (error) {
+
+        // Allow retry after a temporary lookup error
+        delete recentScans[studentId];
+
+        result.innerHTML =
+            "<span style='color:red;font-size:24px;font-weight:bold;'>⚠ LOOKUP FAILED</span><br><br>" +
+            "Check the internet connection and try again.";
+
+        console.error("Student lookup failed:", error);
+    }
+}
+
+
+// Safely display values returned by the student master
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (character) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[character];
+    });
 }
