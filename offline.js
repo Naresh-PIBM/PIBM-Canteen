@@ -33,49 +33,53 @@ scanData.timestamp = now.toLocaleString("en-IN", {
 // Send to Server
 //------------------------------------
 
-function sendToServer(scanData){
 
+
+function sendToServer(scanData) {
     const formData = new URLSearchParams();
+    formData.append("timestamp", scanData.timestamp);
+    formData.append("counter", scanData.counter);
+    formData.append("barcode", scanData.barcode);
+    formData.append("device", scanData.device);
 
-    formData.append("timestamp",scanData.timestamp);
-    formData.append("counter",scanData.counter);
-    formData.append("barcode",scanData.barcode);
-    formData.append("device",scanData.device);
-
-    fetch(API_URL,{
-
-        method:"POST",
-
-        body:formData
-
+    fetch(API_URL, {
+        method: "POST",
+        body: formData
     })
+    .then(response => response.json())
+    .then(data => {
+        const result = document.getElementById("result");
 
-    .then(response=>response.text())
+        if (data.success && !data.duplicate) {
+            result.innerHTML =
+                "<div style='color:green;font-size:26px;font-weight:bold;'>✅ SAVED</div>" +
+                "<div style='font-size:22px;margin-top:10px;'>Student ID: " +
+                escapeHtml(scanData.barcode) + "</div>";
+            console.log("Saved:", scanData.barcode);
+            return;
+        }
 
-    .then(data=>{
+        if (data.duplicate) {
+            result.innerHTML =
+                "<div style='color:red;font-size:26px;font-weight:bold;'>⚠ DUPLICATE — NOT SAVED</div>" +
+                "<div style='font-size:22px;margin-top:10px;'>Student ID: " +
+                escapeHtml(scanData.barcode) + "</div>";
+            console.log("Duplicate rejected:", scanData.barcode);
+            return;
+        }
 
-        document.getElementById("result").innerHTML =
-        "<span style='color:green;font-size:28px;font-weight:bold;'>✅ SAVED</span><br><br>"
-        + scanData.barcode;
-
-        console.log("Saved :",scanData.barcode);
-
+        result.innerHTML =
+            "<div style='color:red;font-size:22px;font-weight:bold;'>❌ NOT SAVED</div>" +
+            "<div>" + escapeHtml(data.message || "Please try again.") + "</div>";
+        console.warn("Scan rejected:", data);
     })
-
-    .catch(error=>{
-
-        saveOffline(scanData);
-
+    .catch(error => {
         document.getElementById("result").innerHTML =
-        "<span style='color:orange;font-size:28px;font-weight:bold;'>🟠 SAVED LOCALLY</span><br><br>"
-        + scanData.barcode;
-
-        console.log("Saved Offline");
-
+            "<div style='color:orange;font-size:24px;font-weight:bold;'>⚠ SAVE STATUS UNKNOWN</div>" +
+            "<div>Please check the meal log before retrying.</div>";
+        console.error("Save status unknown:", error);
     });
-
 }
-
 
 
 //------------------------------------
